@@ -1,5 +1,3 @@
-require File.expand_path('../../lib/capistrano/notifier', __FILE__)
-
 # config valid only for current version of Capistrano
 lock '3.1.0'
 
