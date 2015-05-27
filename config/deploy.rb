@@ -1,40 +1,41 @@
-# config valid only for Capistrano 3.1
+require File.expand_path('../../lib/capistrano/notifier', __FILE__)
+
+# config valid only for current version of Capistrano
 lock '3.1.0'
 
-server '128.199.112.33', port: 22, roles: [:web, :app, :db], primary: true
+set :application, 'rails_server'
+set :repo_url, 'git@github.com:nurhadimaulana/rails_server.git'
 
-set :repo_url,        'git@github.com:nurhadimaulana/rails_server.git'
-set :application,     'rails_server'
-set :user,            'nurhadi'
-set :puma_threads,    [4, 16]
-set :puma_workers,    0
+set :user, 'nurhadi'
+set :use_sudo, false
 
-# Don't change these unless you know what you're doing
-set :pty,             true
-set :use_sudo,        false
-set :stage,           :production
-set :deploy_via,      :remote_cache
-set :deploy_to,       "/home/#{fetch(:user)}/Application/#{fetch(:application)}"
+set :deploy_via, :remote_cache
+set :deploy_to, '/home/nurhadi/Application/rails_server'
 
-namespace :deploy do
+set :linked_files, %w{env Procfile config/database.yml config/puma.rb}
+set :linked_dirs, %w{log tmp/cache tmp/sockets tmp/pids public/uploads}
 
-  desc 'Restart application'
-  task :restart do
-    on roles(:app), in: :sequence, wait: 5 do
-      # Your restart mechanism here, for example:
-      # execute :touch, release_path.join('tmp/restart.txt')
-    end
-  end
+set :ssh_options, { forward_agent: true, auth_methods: %w(publickey) }
 
-  after :publishing, :restart
+# after 'deploy:finished', 'foreman:restart'
 
-  after :restart, :clear_cache do
-    on roles(:web), in: :groups, limit: 3, wait: 10 do
-      # Here we can do anything such as:
-      # within release_path do
-      #   execute :rake, 'cache:clear'
-      # end
-    end
-  end
+#
+# Custom Library deploy
+#
+# desc "tail rails logs"
+# task :logs do
+#   on roles(:app) do
+#     execute "tail -f #{shared_path}/log/#{fetch(:rails_env)}.log"
+#   end
+# end
 
-end
+# desc 'Runs rake db:seed'
+# task seed: fetch(:rails_env) do
+#   on primary fetch(:migration_role) do
+#     within release_path do
+#       with rails_env: fetch(:rails_env) do
+#         execute :rake, "db:seed"
+#       end
+#     end
+#   end
+# end
